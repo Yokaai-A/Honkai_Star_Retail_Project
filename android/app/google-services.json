@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "379983705416",
+    "project_id": "honkai-star-retail-cf352",
+    "storage_bucket": "honkai-star-retail-cf352.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:379983705416:android:29ad267d91f5a2aa33ef7d",
+        "android_client_info": {
+          "package_name": "com.example.honkai_star_retail_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVhGmJIYlTCcDqCRkv8Bz3Aivd4Q4owAI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

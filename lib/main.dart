@@ -1,23 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honkai_star_retail_app/app_router.dart';
+import 'package:honkai_star_retail_app/presentation/blocs/auth/auth_bloc.dart';
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
-  final GoRouter _appRouter = AppRouter().router;
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
-  // This widget is the root of your application.
+class _MyAppState extends State<MyApp> {
+  late final AuthBloc _authBloc;
+  late final AppRouter _appRouter;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = AuthBloc();
+    _appRouter = AppRouter(_authBloc);
+
+    // CRITICAL: Fire initialization event
+    _authBloc.add(AuthInitializeEvent());
+  }
+
+  @override
+  void dispose() {
+    _authBloc.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Honkai Star Retail',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      routerConfig: _appRouter,
+    return BlocProvider.value(
+      value: _authBloc, // Inject BLoC to the widget tree
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Honkai Star Retail',
+        theme: ThemeData(
+          scaffoldBackgroundColor: const Color(0xFF0B0D17),
+          colorScheme: const ColorScheme.dark(
+            primary: Color(0xFFD4AF37),
+            surface: Color(0xFF1E2233),
+          ),
+          useMaterial3: true,
+        ),
+        routerConfig: _appRouter.router,
+      ),
     );
   }
 }
