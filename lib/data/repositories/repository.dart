@@ -1,1 +1,1 @@
-interface class Repository {}
+abstract class Repository {}
