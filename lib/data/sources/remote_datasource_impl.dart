@@ -82,7 +82,7 @@ class RemoteDataSourceImplementation implements RemoteDataSource {
         'uid': user.uid,
         'email': user.email,
         'retail_role': userRow.colByName('role'),
-        'token': user.getIdToken(),
+        'token': await user.getIdToken(),
       };
     } on FirebaseAuthException catch (e) {
       throw Exception('Firebase Auth Error: ${e.message}');

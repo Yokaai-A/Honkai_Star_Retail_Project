@@ -14,20 +14,17 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _remoteDataSource.googleLogin();
       return Right(Success(response));
     } catch (e) {
-      return Left(Failure(Exception(e)));
+      return Left(Failure(Exception('$e')));
     }
   }
 
   @override
-  Future<Either<Failure, Success>> login(
-    String username,
-    String password,
-  ) async {
+  Future<Either<Failure, Success>> login(String email, String password) async {
     try {
-      final response = await _remoteDataSource.login(username, password);
+      final response = await _remoteDataSource.login(email, password);
       return Right(Success(response));
     } catch (e) {
-      return Left(Failure(Exception(e)));
+      return Left(Failure(Exception('$e')));
     }
   }
 }
