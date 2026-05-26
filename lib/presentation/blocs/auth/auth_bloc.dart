@@ -1,12 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honkai_star_retail_app/domain/usecases/appGoogleLogin.dart';
 import 'package:honkai_star_retail_app/domain/usecases/appLogin.dart';
+// Assuming you have Failure/Success types accessible or imported
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AppGoogleLogin _appGoogleLogin;
   final AppLogin _appLogin;
+
   AuthBloc({required AppGoogleLogin appGoogleLogin, required AppLogin appLogin})
     : _appGoogleLogin = appGoogleLogin,
       _appLogin = appLogin,
@@ -20,35 +22,38 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthInitializeEvent event,
     Emitter<AuthState> emit,
   ) async {
-    // 1. Check secure storage for existing token here
+    // TODO: Await actual secure storage check
     await Future.delayed(const Duration(seconds: 2));
-
-    // Defaulting to unauthenticated for the assignment flow
     emit(AuthUnauthenticated());
   }
 
   Future<void> _onLogin(AuthLoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    try {
-      // 2. Execute Node.js API call here
-      await Future.delayed(const Duration(seconds: 2));
 
-      // 3. Mock Authentication Logic
-      final String inputUser = event.username.trim().toLowerCase();
-      final bool isAdmin = inputUser == 'admin';
-      const String mockBearerToken = 'n8x7wfqtsrvxnvsm8dcz';
+    // Execute the appropriate use case based on event type
+    final result = await (event.loginType == AuthLoginType.google
+        ? _appGoogleLogin.execute()
+        : _appLogin.execute(event.email, event.password));
 
-      emit(AuthAuthenticated(token: mockBearerToken, isAdmin: isAdmin));
-    } catch (e) {
-      emit(AuthError("System Error: Authentication Failed"));
-      emit(
-        AuthUnauthenticated(),
-      ); // Revert to unauthenticated so user can try again
-    }
+    // Resolve the Either type directly. No try/catch needed unless the
+    // use case itself throws unhandled fatal exceptions.
+    result.fold(
+      ifLeft: (failure) {
+        emit(AuthError(failure.exception.toString()));
+      },
+      ifRight: (success) {
+        emit(
+          AuthAuthenticated(
+            token: success.value['token'],
+            isAdmin: success.value['role'] == 'admin',
+          ),
+        );
+      },
+    );
   }
 
   void _onLogout(AuthLogoutEvent event, Emitter<AuthState> emit) {
-    // 4. Clear secure storage here
+    // TODO: Await secure storage clearance
     emit(AuthUnauthenticated());
   }
 }

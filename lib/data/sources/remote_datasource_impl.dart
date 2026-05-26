@@ -39,11 +39,31 @@ class RemoteDataSourceImplementation implements RemoteDataSource {
       if (user == null) {
         throw Exception('Firebase authentication returned a null user.');
       }
+
+      final IResultSet result = await _mySQLConnectionPool.execute(
+        "SELECT * FROM users WHERE firebase_uid = :uid LIMIT 1",
+        {"uid": user.uid},
+      );
+
+      String? role;
+      if (result.rows.isEmpty) {
+        role =
+            'user'; // default to user if not in MySQL, or you can insert them
+        await _mySQLConnectionPool.execute(
+          "INSERT INTO users (firebase_uid, email, role) VALUES (:uid, :email, :role)",
+          {"uid": user.uid, "email": user.email ?? '', "role": role},
+        );
+      } else {
+        role = result.rows.first.colByName('role');
+      }
+
       return {
         'uid': user.uid,
         'email': user.email,
         'displayName': user.displayName,
         'photoURL': user.photoURL,
+        'role': role,
+        'token': await user.getIdToken(),
         'isNewUser': userCredential.additionalUserInfo?.isNewUser ?? false,
       };
     } on FirebaseAuthException catch (e) {
@@ -81,7 +101,7 @@ class RemoteDataSourceImplementation implements RemoteDataSource {
       return {
         'uid': user.uid,
         'email': user.email,
-        'retail_role': userRow.colByName('role'),
+        'role': userRow.colByName('role'),
         'token': await user.getIdToken(),
       };
     } on FirebaseAuthException catch (e) {

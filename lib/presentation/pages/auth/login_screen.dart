@@ -29,8 +29,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Dispatch the BLoC event instead of handling state locally
     context.read<AuthBloc>().add(
-      AuthLoginEvent(_usernameController.text, _passwordController.text),
+      AuthLoginEvent(
+        _usernameController.text,
+        _passwordController.text,
+        AuthLoginType.regular,
+      ),
     );
+  }
+
+  void _handleGoogleLogin() {
+    context.read<AuthBloc>().add(AuthLoginEvent('', '', AuthLoginType.google));
   }
 
   @override
@@ -158,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: isLoading
                                   ? () {}
                                   : () {
-                                      // Native Google Sign-In bridge target
+                                      _handleGoogleLogin();
                                     },
                               isPrimary: false,
                             ),
@@ -176,7 +184,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-// --- Component 1: HsrGlassCard ---
-
-// --- Component 2: HsrTerminalTextField ---
