@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honkai_star_retail_app/app_router.dart';
 import 'package:honkai_star_retail_app/firebase_options.dart';
+import 'package:honkai_star_retail_app/injection.dart';
 import 'package:honkai_star_retail_app/presentation/blocs/auth/auth_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await injectDependency();
+
   runApp(const MyApp());
 }
 
@@ -19,8 +23,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late final AuthBloc _authBloc;
-  late final AppRouter _appRouter;
+  // Resolve dependencies directly from GetIt during initialization
+  late final AuthBloc _authBloc = di<AuthBloc>();
+  late final AppRouter _appRouter = di<AppRouter>();
 
   @override
   void initState() {
@@ -29,15 +34,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  void dispose() {
-    _authBloc.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: _authBloc, // Inject BLoC to the widget tree
+      value: _authBloc,
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Honkai Star Retail',

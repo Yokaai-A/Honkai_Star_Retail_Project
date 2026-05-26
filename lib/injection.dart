@@ -11,11 +11,20 @@ import 'package:honkai_star_retail_app/domain/usecases/appLogin.dart';
 import 'package:honkai_star_retail_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:mysql_client/mysql_client.dart';
 
+// Use GetIt.instance to ensure you are hitting the global locator,
+// rather than scoping a new isolated instance unless explicitly required by your architecture.
 GetIt di = GetIt.instance;
 
-void injectDependency() {
-  // Singleton (Repositories, RemoteDataSource, etc. )
-  di.registerLazySingleton<RemoteDataSourceImplementation>(
+Future<void> injectDependency() async {
+  // 1. External Dependencies & Core Services
+  di.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+  di.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn.instance);
+
+  // 2. Initialize and Register MySQL Pool
+  di.registerSingleton<MySQLConnectionPool>(await initializeMySQLPool());
+
+  // 2. Data Sources
+  di.registerLazySingleton<RemoteDataSource>(
     () => RemoteDataSourceImplementation(
       firebaseAuth: di<FirebaseAuth>(),
       googleSignIn: di<GoogleSignIn>(),
@@ -23,22 +32,40 @@ void injectDependency() {
     ),
   );
 
-  di.registerLazySingleton<AuthRepositoryImpl>(
+  // 3. Repositories
+  di.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: di<RemoteDataSource>()),
   );
 
-  // Usecases
-  di.registerSingleton(AppGoogleLogin(di<AuthRepository>()));
-  di.registerSingleton(AppLogin(di<AuthRepository>()));
+  // 4. Use Cases (Converted to LazySingleton to prevent startup lag and order-of-execution crashes)
+  di.registerLazySingleton<AppGoogleLogin>(
+    () => AppGoogleLogin(di<AuthRepository>()),
+  );
+  di.registerLazySingleton<AppLogin>(() => AppLogin(di<AuthRepository>()));
 
-  // Factory (State Management, etc.)
-  di.registerFactory(
+  // 5. State Management (Must be LazySingleton if injected into a Singleton Router)
+  di.registerLazySingleton<AuthBloc>(
     () => AuthBloc(
       appGoogleLogin: di<AppGoogleLogin>(),
       appLogin: di<AppLogin>(),
     ),
   );
 
-  // App Router
+  // 6. Router (Depends on global AuthBloc state)
   di.registerLazySingleton<AppRouter>(() => AppRouter(di<AuthBloc>()));
+}
+
+Future<MySQLConnectionPool> initializeMySQLPool() async {
+  try {
+    return MySQLConnectionPool(
+      host: '127.0.0.1', // Replace with your DB host
+      port: 3306,
+      userName: 'root', // Replace with your DB user
+      password: 'password', // Replace with your DB password
+      databaseName: 'honkai_retail', // Replace with your DB name
+      maxConnections: 10,
+    );
+  } catch (e) {
+    throw Exception('CRITICAL: Database failed to connect on startup. $e');
+  }
 }
