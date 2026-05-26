@@ -1,4 +1,4 @@
-# honkai_star_retail_app
+# Honkai Star Retail App
 
 A new Flutter project.
 

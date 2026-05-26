@@ -6,7 +6,7 @@ interface class AppLogin {
   final AuthRepository _authRepository;
   AppLogin(this._authRepository);
 
-  Future<Either<Failure, Success>> login(String username, String password) {
-    return _authRepository.login(username, password);
+  Future<Either<Failure, Success>> login(String email, String password) {
+    return _authRepository.login(email, password);
   }
 }

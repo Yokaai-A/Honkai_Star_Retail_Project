@@ -1,9 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:honkai_star_retail_app/domain/usecases/appGoogleLogin.dart';
+import 'package:honkai_star_retail_app/domain/usecases/appLogin.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial()) {
+  final AppGoogleLogin _appGoogleLogin;
+  final AppLogin _appLogin;
+  AuthBloc({required AppGoogleLogin appGoogleLogin, required AppLogin appLogin})
+    : _appGoogleLogin = appGoogleLogin,
+      _appLogin = appLogin,
+      super(AuthInitial()) {
     on<AuthInitializeEvent>(_onInitialize);
     on<AuthLoginEvent>(_onLogin);
     on<AuthLogoutEvent>(_onLogout);

@@ -25,10 +25,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _authBloc = AuthBloc();
-    _appRouter = AppRouter(_authBloc);
-
-    // CRITICAL: Fire initialization event
     _authBloc.add(AuthInitializeEvent());
   }
 
