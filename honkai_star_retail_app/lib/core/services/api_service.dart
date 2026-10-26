@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Singleton service untuk semua HTTP call ke REST API server.
-/// Base URL: http://localhost:3000
+/// Base URL: http://localhost:3001
 class ApiService {
   ApiService._internal();
   static final ApiService instance = ApiService._internal();
 
-  static const String _baseUrl = 'http://localhost:3000';
+  static const String _baseUrl = 'http://localhost:3001';
   static const String _tokenKey = 'hsr_api_token';
   static const String _roleKey = 'hsr_api_role';
 
